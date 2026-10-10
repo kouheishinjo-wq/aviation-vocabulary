@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>航空英語 単語帳</title>
+<meta name="description" content="航空英語1000語の単語帳アプリ">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="航空英語">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#2563eb">
+<style>
+  :root { --bg: #ffffff; --fg: #111827; --muted: #6b7280; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #111317; --fg: #e8eaed; --muted: #9aa0a6; }
+  }
+  :root[data-theme="dark"] { --bg: #111317; --fg: #e8eaed; --muted: #9aa0a6; }
+  :root {
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); background: var(--bg); }
+  *, *::before, *::after { box-sizing: inherit; }
+  body {
+    margin: 0;
+    padding: 12px 14px 32px;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  h1 { font-size: 17px; font-weight: 600; margin: 4px 0 8px; }
+  button, select, textarea, input { font-family: inherit; touch-action: manipulation; }
+  button { cursor: pointer; }
+  select, textarea, input { background: var(--bg); color: var(--fg); }
+  button:active { transform: scale(0.98); }
+  .status { font-size: 12px; color: var(--muted); margin: 0 0 4px; }
+  #statusbox { margin-bottom: 12px; }
+</style>
+</head>
+<body>
+<h1>航空英語 単語帳</h1>
+<div id="statusbox">
+  <div class="status" id="saveStatus">保存先を確認中...</div>
+  <div class="status" id="offlineStatus">オフライン: 確認中...</div>
+</div>
+<div id="root"></div>
+<script src="app.js"></script>
+<script>
+(function () {
+  var el = document.getElementById('offlineStatus');
+  function set(t) { if (el) el.textContent = t; }
+  if (!('serviceWorker' in navigator)) {
+    set('オフライン: この環境では使えません');
+    return;
+  }
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').then(function () {
+      return navigator.serviceWorker.ready;
+    }).then(function () {
+      return caches.match('./app.js');
+    }).then(function (hit) {
+      set(hit ? 'オフライン: 使えます(通信なしで起動できます)' : 'オフライン: 準備中(一度、通信できる状態で開き直してください)');
+    }).catch(function () {
+      set('オフライン: 準備できませんでした');
+    });
+  });
+})();
+</script>
+</body>
+</html>

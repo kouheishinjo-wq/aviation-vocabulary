@@ -1,6 +1,6 @@
 // オフライン用の仕組み(Service Worker)
 // アプリ更新時は、下の VERSION の数字を上げます。
-var VERSION = 'v1';
+var VERSION = 'v4';
 var CACHE = 'aviation-vocab-' + VERSION;
 var ASSETS = [
   './',
@@ -15,7 +15,15 @@ var ASSETS = [
 
 self.addEventListener('install', function (e) {
   e.waitUntil(
-    caches.open(CACHE).then(function (c) { return c.addAll(ASSETS); }).then(function () { return self.skipWaiting(); })
+    caches.open(CACHE).then(function (c) {
+      // ブラウザの古い保存分ではなく、サーバーの最新を取りに行く
+      return Promise.all(ASSETS.map(function (u) {
+        return fetch(new Request(u, { cache: 'reload' })).then(function (res) {
+          if (!res.ok) throw new Error('fetch failed: ' + u);
+          return c.put(u, res);
+        });
+      }));
+    }).then(function () { return self.skipWaiting(); })
   );
 });
 
